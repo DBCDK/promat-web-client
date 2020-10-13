@@ -1,6 +1,7 @@
 import React from 'react'
 import Table from 'react-bootstrap/Table'
 import PropTypes from 'prop-types';
+import DBCButton from './Button';
 
 export default class DBCTable extends React.Component {
     render() {
@@ -8,17 +9,17 @@ export default class DBCTable extends React.Component {
             <Table responsive>
             <thead>
                 <tr>
-                {this.props.headers.map((el, index) => (
+                {this.props.header.map((el, index) => (
                     <th key={index}>{el.label}</th>
                 ))}
                 </tr>
             </thead>
             <tbody>
 
-                {this.props.children.map((el,i) => {
+                {this.props.data.map((el,i) => {
                     return (
                         <tr key={i} onClick={() => this.props.onClickRow(el)}>
-                            {this.props.headers.reduce((sorted, key, index) => {
+                            {this.props.header.reduce((sorted, key, index) => {
                                 sorted.push(el[key.name])
                                 return sorted
                             },[]).map((e, index) => (
@@ -33,9 +34,12 @@ export default class DBCTable extends React.Component {
         )
     }
 }
-
+DBCTable.defaultProps = {
+    header: [],
+    data: []
+}
 DBCTable.propTypes = {
-    header: PropTypes.array,
-    data: PropTypes.array,
-    onClickRow: PropTypes.func
+    header: PropTypes.array, // header array of {} 
+    data: PropTypes.array, // data array of []
+    onClickRow: PropTypes.func // onClick handler on row click
   };
