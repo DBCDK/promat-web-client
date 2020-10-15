@@ -18,11 +18,22 @@ export default {
 
 const Template = (args) => {
   return (
-    <div style={{ background: '#f1f1f1' }}>
+    <div>
       <CreateCase {...args} />
     </div>
   );
 };
 
-export const Overblik = Template.bind({});
-Overblik.args = {};
+export const ValgAfPost = Template.bind({});
+ValgAfPost.args = {};
+
+export const AnmelderOgAfregning = Template.bind({});
+AnmelderOgAfregning.args = {
+  identifier:"1234"
+};
+
+export const FindAnmelder = Template.bind({});
+FindAnmelder.args = {
+  identifier:"1234",
+  show:"reviewer"
+};
