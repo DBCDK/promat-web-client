@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import Form from 'react-bootstrap/Form'
 import DBCButton from './Button'
@@ -9,64 +9,65 @@ import DBCButton from './Button'
 // }
 
 export default function DBCForm(props) {
+
+    const [state, setState] = useState({})
+    
+    const mapFormContent = (child, i) => {
+        const wrapChild = (childComp) => (
+            <div key={i}>
+                <Form.Label>{child.label}</Form.Label>
+                {childComp}
+            </div>
+        )
+        switch (child.type) {
+            case "select": return wrapChild(
+                <Form.Control
+                    as={child.type}
+                    className="mr-sm-2"
+                    id="inlineFormCustomSelect"
+                    custom>
+                    {
+                        child.options
+                        ? child.options.map((op) => (<option key={op.value} value={op.value}>{op.label}</option>))
+                        : []
+                    }
+                </Form.Control>
+            )
+            case "checkbox": return (
+                <Form.Check type={child.type} onChange={() => props.onSelect(child.label)} label={child.label} />
+            )
+            case "textarea": return wrapChild(
+                <Form.Control as="textarea" placeholder={child.placeholder} onChange={(e) => setState({
+                    ...state,
+                    [child.name]: e.target.value,
+                })}></Form.Control>
+            )
+            default: return wrapChild(<Form.Control type={child.type} placeholder={child.placeholder} onChange={(e) => setState({
+                ...state,
+                [child.name]: e.target.value,
+            })} />)
+        }
+    }
     return (
-        <Form>
+        <Form className={props.className}>
             <Form.Group controlId="x">
             {
-                props.elements && props.elements.filter(Boolean).map((child, index) => child.type === "button" ? (
-                    <DBCButton variant="primary" onClick={() => props.onSubmit()}>{child.label}</DBCButton>
-
-                ) : child.type === "select" ? (
-                    <div key={index}>
-                    <Form.Label>{child.label}</Form.Label>
-                    <Form.Control
-                        as="select"
-                        className="mr-sm-2"
-                        id="inlineFormCustomSelect"
-                        custom
-                    >
-                        {
-                            child.options
-                            ? child.options.map((op) => (<option key={op.value} value={op.value}>{op.label}</option>))
-                            : []
-                        }
-                    </Form.Control>
-                    </div>
-                ) : child.type === "checkbox" ? (
-                    <Form.Check type="checkbox" onChange={() => props.onSelect(child.label)} label={child.label} />
-                ) : (
-                    <div key={index}>
-                    <Form.Label>{child.label}</Form.Label>
-                    {
-                        child.type === "text" && (
-                            <Form.Control type={child.type} placeholder={child.placeholder} />
-                        )
-                    }
-                    {
-                        child.type === "textarea" && (
-                            <Form.Control type={child.type} placeholder={child.placeholder} />
-                        )
-                    }
-                    {
-                        child.type === "date" && (
-                            <Form.Control type={child.type} placeholder={child.placeholder} />
-                        )
-                    }
-                    </div>
-                ))
+                props.elements.map(mapFormContent)
             }
-            </Form.Group>
             {
                 props.onSubmit && (
-                <DBCButton variant="primary" onClick={() => props.onSubmit()}>
+                <DBCButton variant="primary" type="submit" onClick={() => props.onSubmit(state)}>
                     {props.submitLabel}
                 </DBCButton>
                 )
             }
+            </Form.Group>
+
         </Form>
     )
 }
 DBCForm.defaultProps = {
+    className:"",
     elements: [],
     submitLabel: "Gem",
 }
