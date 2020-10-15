@@ -1,6 +1,7 @@
 import React from 'react'
 import DBCTable from '../DBCDesign/components/Table'
 import DBCButton, {DBCButtonGroup} from '../DBCDesign/components/Button'
+import {Container, Row, Col} from 'react-bootstrap'
 import {Link} from "react-router-dom";
 
 const header = [
@@ -58,32 +59,46 @@ const header = [
   ]
 
 function OverviewTable(props) {
-    return (
-    <div className="promat-container">
-        <div className="promat-container-header">
-        <h3>{props.label} – {data.length}</h3>
 
-          <DBCButtonGroup>
-            <DBCButton>Bøger</DBCButton>
-            <DBCButton>Film</DBCButton>
-            <DBCButton>Multimedier</DBCButton>
-          </DBCButtonGroup>
-              
-        </div>
+    return (
+      <div className="promat-container">
+      <Row noGutters={true}>
+        <Col sm={8} className="promat-container-header">
+          <h3>{props.label}</h3>
+        </Col>
+        <Col sm={4} className="align-right">
+        <DBCButtonGroup>
+          <DBCButton>Bøger</DBCButton>
+          <DBCButton>Film</DBCButton>
+          <DBCButton>Multimedier</DBCButton>
+        </DBCButtonGroup>
+        </Col>
+        <Col className="margin-top-20">
         
         <DBCTable header={header} data={data} />
-      </div>
+        
+        </Col>
+      </Row>
+    </div>
     )
 }
 
 export default function AdminOverview(props) {
-    return (
-        <div>
-            <h1>Admin overblik</h1>
-            <Link to="/create-case"><DBCButton>Start ny sag</DBCButton></Link>
-            {["Afventer godkendelse","Afviste anmeldelser","Afventer"].map((key) => (
-                <OverviewTable label={key}></OverviewTable>
-            ))}
-        </div>
-    )
+  return (
+      <Container>
+        <Row>
+          <Col sm={8}>
+            <h1>Forside</h1>
+          </Col>
+          <Col sm={4} className="align-right"><Link to="/create-case"><DBCButton>Opret sag</DBCButton></Link></Col>
+          <Col>
+          
+          {["Afventer godkendelse","Afviste anmeldelser","Afventer"].map((key) => (
+              <OverviewTable label={key}></OverviewTable>
+          ))}
+          
+          </Col>
+        </Row>
+      </Container>
+  )
 }
