@@ -18,7 +18,7 @@ export default {
 
 const Template = (args) => {
   return (
-    <div style={{ background: '#f1f1f1' }}>
+    <div>
       <App {...args} />
     </div>
   );
