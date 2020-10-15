@@ -4,7 +4,7 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
-
+import './App.css'
 import Overview from './components/AdminOverview'
 import CreateCase from './components/CreateCase'
 import SearchCase from './components/SearchCase'
@@ -14,6 +14,7 @@ import Navigation from './DBCDesign/components/Navigation'
 const NavLinks = [
   {to:"/overview",label:"Overblik", component:() => Overview},
   {to:"/create-case",label:"Opret sag", component:() => CreateCase},
+  {to:"/create-case/:id",label:"Opret sag", component:() => CreateCaseWithMaterial},
   // {to:"/find",label:"Find sag",component:() => SearchCase},
   {to:"/",label:"Promat", component:() => Login},
 ]
@@ -23,7 +24,7 @@ export default function App() {
     <BrowserRouter>
       <div id="promat-app">
       
-      <Navigation>{NavLinks}</Navigation>
+      {/* <Navigation>{NavLinks}</Navigation> */}
 
       <Switch>
         {
