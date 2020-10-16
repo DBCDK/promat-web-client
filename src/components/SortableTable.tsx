@@ -17,16 +17,16 @@ function getComparatorForKey<T>(key: keyof T, reverse: boolean = false) {
 interface THProps<T> {
   column: SortableTableColumn<T>;
   onClick: (column: SortableTableColumn<T>) => void;
-  currentKey?: string;
+  currentColumn?: SortableTableColumn<T>;
   isReversed: boolean;
 }
 
 // Custom table header that handles sorting etc.
-function TH<T>({ column, onClick, currentKey, isReversed }: THProps<T>) {
+function TH<T>({ column, onClick, currentColumn, isReversed }: THProps<T>) {
   if (column.comparatorField === undefined) {
     return <th>{column.header || ""}</th>;
   }
-  const isCurrent = currentKey === column.key;
+  const isCurrent = currentColumn === column;
   return (
     <th
       style={{ border: isCurrent ? "1px solid black" : "1px dashed black" }}
@@ -55,7 +55,7 @@ interface Props<T> {
 
 interface State<T> {
   sortedData: SortableTableData<T>;
-  currentSortedColumnKey?: string;
+  currentSortedColumn?: SortableTableColumn<T>;
   isSortingReversed: boolean;
 }
 
@@ -68,13 +68,41 @@ export default class SortableTable<T> extends React.Component<
     this.state = { sortedData: props.data, isSortingReversed: false };
   }
 
+  componentDidUpdate = (prevProps: Props<T>) => {
+    const { data } = this.props;
+    if (prevProps.data !== data) {
+      this.handleDataUpdate();
+    }
+  };
+
+  handleDataUpdate = () => {
+    const { currentSortedColumn, isSortingReversed } = this.state;
+    const { data } = this.props;
+
+    if (currentSortedColumn) {
+      const comparator =
+        currentSortedColumn.comparatorField !== undefined &&
+        getComparatorForKey(
+          currentSortedColumn.comparatorField,
+          isSortingReversed
+        );
+      if (!comparator) {
+        return;
+      }
+      const sortedData = data.sort(comparator);
+      this.setState({ sortedData });
+    } else {
+      this.setState({ sortedData: data });
+    }
+  };
+
   handleSortByColumn = (column: SortableTableColumn<T>) =>
     // @ts-ignore
     this.setState((prevState) => {
-      const { isSortingReversed, currentSortedColumnKey } = prevState;
+      const { isSortingReversed, currentSortedColumn } = prevState;
 
       const isReversed =
-        currentSortedColumnKey === column.key ? !isSortingReversed : false;
+        currentSortedColumn === column ? !isSortingReversed : false;
 
       const { data } = this.props;
       const comparator =
@@ -89,18 +117,14 @@ export default class SortableTable<T> extends React.Component<
 
       return {
         sortedData,
-        currentSortedColumnKey: column.key,
+        currentSortedColumn: column,
         isSortingReversed: isReversed,
       };
     });
 
   render = () => {
     const { tableProps, columns } = this.props;
-    const {
-      sortedData,
-      currentSortedColumnKey,
-      isSortingReversed,
-    } = this.state;
+    const { sortedData, currentSortedColumn, isSortingReversed } = this.state;
 
     return (
       <Table {...(tableProps || {})}>
@@ -110,7 +134,7 @@ export default class SortableTable<T> extends React.Component<
               <TH
                 onClick={this.handleSortByColumn}
                 isReversed={isSortingReversed}
-                currentKey={currentSortedColumnKey}
+                currentColumn={currentSortedColumn}
                 column={col}
               />
             ))}
