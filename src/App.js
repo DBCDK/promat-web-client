@@ -14,7 +14,7 @@ import Navigation from './DBCDesign/components/Navigation'
 const NavLinks = [
   {to:"/overview",label:"Overblik", component:() => Overview},
   {to:"/create-case",label:"Opret sag", component:() => CreateCase},
-  {to:"/create-case/:id",label:"Opret sag", component:() => CreateCaseWithMaterial},
+  // {to:"/create-case/:id",label:"Opret sag", component:() => CreateCaseWithMaterial},
   // {to:"/find",label:"Find sag",component:() => SearchCase},
   {to:"/",label:"Promat", component:() => Login},
 ]
