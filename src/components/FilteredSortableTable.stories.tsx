@@ -60,7 +60,6 @@ interface State {
 }
 
 class FilteredSortableExampleComponent extends React.Component<Props, State> {
-  ref = React.createRef<FilteredSortableTable<TableDataObject>>();
   state: State = {
     shouldABeZero: false,
     shouldABelargerThan1: false,
@@ -68,28 +67,15 @@ class FilteredSortableExampleComponent extends React.Component<Props, State> {
   };
 
   handleToggleShouldABeZero = (event: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState(
-      { shouldABeZero: event.target.checked },
-      this.handleFilterChange
-    );
+    this.setState({ shouldABeZero: event.target.checked });
 
   handleToggleShouldABelargerThan1 = (
     event: React.ChangeEvent<HTMLInputElement>
-  ) =>
-    this.setState(
-      { shouldABelargerThan1: event.target.checked },
-      this.handleFilterChange
-    );
+  ) => this.setState({ shouldABelargerThan1: event.target.checked });
 
   handleToggleShouldDNotContain42 = (
     event: React.ChangeEvent<HTMLInputElement>
-  ) =>
-    this.setState(
-      { shouldDNotContain42: event.target.checked },
-      this.handleFilterChange
-    );
-
-  handleFilterChange = () => this.ref.current && this.ref.current.applyFilter();
+  ) => this.setState({ shouldDNotContain42: event.target.checked });
 
   filterCallback = (value: TableDataObject) => {
     const {
@@ -150,7 +136,11 @@ class FilteredSortableExampleComponent extends React.Component<Props, State> {
           columns={columns}
           data={data}
           filterCallback={this.filterCallback}
-          ref={this.ref}
+          uniqueFilterKey={JSON.stringify({
+            shouldDNotContain42,
+            shouldABeZero,
+            shouldABelargerThan1,
+          })}
           emptyDataView={<h3>no results</h3>}
         />
       </div>

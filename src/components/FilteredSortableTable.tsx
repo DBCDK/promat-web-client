@@ -11,6 +11,11 @@ interface Props<T> {
   tableProps?: TableProps;
   filterCallback: (value: T, index: number, array: T[]) => boolean;
   emptyDataView?: React.ReactNode;
+  // This key should be generated from all relevant filter parameters.
+  // It can be a JSON string of an object with the parameters.
+  // This is to ensure that the filter algorithm is only called when
+  // the filter terms are changing.
+  uniqueFilterKey: string;
 }
 
 interface State<T> {
@@ -28,8 +33,11 @@ export default class FilteredSortableTable<T> extends React.Component<
   };
 
   componentDidUpdate = (prevProps: Props<T>) => {
-    const { data } = this.props;
-    if (prevProps.data !== data) {
+    const { data, uniqueFilterKey } = this.props;
+    if (
+      prevProps.data !== data ||
+      prevProps.uniqueFilterKey !== uniqueFilterKey
+    ) {
       this.applyFilter();
     }
   };
