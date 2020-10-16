@@ -5,6 +5,7 @@ import DBCButton, {DBCButtonGroup} from '../DBCDesign/components/Button'
 import DBCModal from '../DBCDesign/components/Modal'
 import DBCForm from '../DBCDesign/components/Form'
 import {Container, Row, Col} from 'react-bootstrap'
+import PromatProvider from './PromatProvider';
 
 const headers = [
   {label:"Titel",name:"title"},
@@ -121,7 +122,9 @@ function AssignCase(props) {
   )
   return (
     <DBCModal title="Anmelder" size="xl" onClose={() => setShow(false)}>
-      <SelectReviewer />
+      <PromatProvider resource="reviewers">
+        <SelectReviewer />
+      </PromatProvider>
     </DBCModal>
   )
 }
@@ -139,9 +142,10 @@ function CaseContains(props) {
 
 const standardMessageText = [
     "Standard besked #1",
-    "Standard besked #2 xx",
+    "Standard besked #2",
     "Standard besked #3",
-]
+].map((label) => ({label,value:label}))
+
 function CaseMessage(props) {
     return (
         <DBCForm onSelect={props.onSelect} elements={[
@@ -235,22 +239,14 @@ function BillingCodes(props) {
 
 
 function SearchOpenSearch(query) {
+  if ( ! query) return
   return new Promise((resolve,reject) => {
-    const url = "https://cors-anywhere.herokuapp.com/https://oss-services.dbc.dk/opensearch/5.2/?action=getObject&identifier=870970-basis:28692765&agency=100200&profile=test&outputType=json"
-
-    //https://oss-services.dbc.dk/opensearch/5.2/?action=getObject&identifier=870970-basis:28692765&agency=100200&profile=test
-    fetch(url).then((rsp) => rsp.json()).then((str) => {
-      console.log(str)
-      const res = str.searchResponse.result.searchResult
-      resolve(res.map((result) => result.collection.object[0].record).reduce((res, entry) => {
-          res = Object.keys(entry).reduce((sorted, key) => {
-          sorted = Object.assign({}, sorted, ({[key]:Array.isArray(entry[key]) ? entry[key].map((k) => k["$"])[0] : entry[key]}))
-          return sorted
-          }, {})
-      })
-      )
+    const url = "http://localhost:3001/opensearch/?id="+encodeURIComponent(query)
+    fetch(url).then((rsp) => rsp.json()).then((res) => {
+      resolve(res)
   })
-})}
+})
+}
 
 function MaterialMetadata(props) {
   const metafields = [
@@ -335,8 +331,29 @@ function MaterialMetadata(props) {
 }
 
 function SelectReviewer(props) {
-  return (
-    
+  const [queryReviewers, setReviewerQuery] = useState({})
+  const buildReviewerQuery = (filterKey, filterValue) => {
+    if (queryReviewers[filterKey] && queryReviewers[filterKey] === filterValue) {
+      setReviewerQuery(Object.keys(queryReviewers).reduce((obj,prop) => {
+        if (prop !== filterKey) {
+          obj[filterKey] = queryReviewers[filterKey]
+        }
+        return obj
+      },{}))
+    }
+    else {
+      setReviewerQuery({...queryReviewers, [filterKey]:filterValue})
+    }
+  }
+  const removeFromReviewerQuery = (filterKey) => {
+    setReviewerQuery(Object.keys(queryReviewers).reduce((obj,prop) => {
+      if (prop !== filterKey) {
+        obj[filterKey] = queryReviewers[filterKey]
+      }
+      return obj
+    },{}))
+  }
+  return (  
     <Container>
       <Row>
         
@@ -347,18 +364,18 @@ function SelectReviewer(props) {
         <Col sm={6}>
           <p>Vælg område</p>
           <DBCButtonGroup>
-            <DBCButton>Voksen</DBCButton>
-            <DBCButton>Børn / skole</DBCButton>
-            <DBCButton>Voksen og børn</DBCButton>
+            <DBCButton onClick={() => buildReviewerQuery("area","adult")}>Voksen</DBCButton>
+            <DBCButton onClick={() => buildReviewerQuery("area","children-school")}>Børn / skole</DBCButton>
+            <DBCButton onClick={() => buildReviewerQuery("area","adult-kids")}>Voksen og børn</DBCButton>
           </DBCButtonGroup>
         </Col>
 
         <Col sm={6}>
-          <DBCForm elements={[
+          <DBCForm onChange={(e) => buildReviewerQuery("subject",e.target.value)} elements={[
             {type:"select", label:"Emne", placeholder:"Søg eller vælg emne", options:[
-              {value:"a",label:"a"},
-              {value:"b",label:"b"},
-              {value:"c",label:"c"},
+              {value:"00-07-01",label:"Voksen > 00-07 > 01 Bibliografi"},
+              {value:"00-07-02",label:"Voksen > 00-07 > 02 Pibliografi"},
+              {value:"00-07-03",label:"Voksen > 00-07 > 03 Mibliografi"},
             ]}
           ]}></DBCForm>
         </Col>
@@ -366,18 +383,16 @@ function SelectReviewer(props) {
         <Col sm={12}>
           <div className="create-case-reviewer-query bg-light-grey padding-20">
             {
-              [
-                {label:"Voksen > 00-07 > 01 Bibliografi",value:"00-07-01"}
-              ].map((el,i) => (
-              <DBCButton>{el.label} &times;</DBCButton>
+              queryReviewers && Object.keys(queryReviewers).map((queryKey,i) => (
+              <DBCButton className="margin-right-10" key={i} onClick={() => removeFromReviewerQuery(queryKey)}>{queryReviewers[queryKey]} &times;</DBCButton>
               ))
             }
           </div>
         </Col>
 
         <Col sm={12}>
-          <DBCForm className="inline-form-elements" elements={[
-            {type:"checkbox",name:"modtager-expres",label:"Modtager expres"},
+          <DBCForm className="inline-form-elements" onSelect={(checkbox) => buildReviewerQuery(checkbox.name,checkbox.label)} elements={[
+            {type:"checkbox",name:"modtager-expres",label:"Modtager ekspres"},
             {type:"checkbox",name:"modtager-ebooks",label:"Modtager ebøger"},
             {type:"checkbox",name:"modtager-bkm",label:"Modtager BKM"},
             {type:"checkbox",name:"show-ferie",label:"Vis anmeldere på ferie"},
@@ -385,8 +400,12 @@ function SelectReviewer(props) {
           ]}></DBCForm>
         </Col>
 
+        <Col>
+        <pre>{JSON.stringify(queryReviewers)}</pre>
+        </Col>
+
         <Col sm={12}>
-          <DBCTable searchable={true} rowCheckbox={true} rowCheckboxAs={"radio"} onClickRow={(row) => console.log(row)} header={[
+          <DBCTable searchable={true} searchableCol={"reviewer"} rowCheckbox={true} rowCheckboxAs={"radio"} onClickRow={(row) => console.log(row)} header={[
             {name:"reviewer",label:"Anmelder"},
             {name:"quote",label:"Kvote"},
             {name:"ebooks",label:"Ebøger"},
@@ -395,6 +414,13 @@ function SelectReviewer(props) {
             {name:"notes",label:"Noter"},
             {name:"profile",label:"Se profil"},
           ]} data={[
+            ...props.reviewers.map((rev) => ({
+              reviewer: rev.name,
+              quote:"1 bog mere",
+              ebooks:false,
+              express:false,
+              notes:rev.email
+            })),
             {
               reviewer:"Agger, Maybrit",
               quote:"1 bog mere",
@@ -490,7 +516,9 @@ export default function StartCreateCase(props) {
   if (props.identifier) {
     if (props.show === "reviewer") {
       return (
+      <PromatProvider resource="reviewers">
         <SelectReviewer {...props} />
+      </PromatProvider>
       )
     }
     return <CreateCaseWithMaterial {...props} />
@@ -505,8 +533,12 @@ export default function StartCreateCase(props) {
             <DBCForm elements={[
               {type:"text",name:"identifier",label:"Faustnr. / ISBN / Stregkode"}
             ]} submitLabel={"Søg efter materiale"} onSubmit={(formData) => {
+              
+              setResults(false) // reset results
+
               const queryId = formData && formData.identifier
-              SearchOpenSearch(queryId).then((rsp) => setResults(rsp))
+              SearchOpenSearch(queryId).then((rsp) => setResults(rsp.data))
+            
             }}></DBCForm>
         </Col>
         
@@ -523,19 +555,11 @@ export default function StartCreateCase(props) {
 
             <DBCTable rowCheckbox={true} onClickRow={(row) => setMaterialeSource(row)} header={[
               {label:"Titel",name:"title"},
-              {label:"Forfatter",name:"author"},
-              {label:"Faustnr",name:"faust"},
-              {label:"Materialetype",name:"materialType"},
+              {label:"Forfatter",name:"creator"},
+              {label:"Faustnr",name:"identifier"},
+              {label:"Materialetype",name:"type"},
               {label:"Status",name:"status"},
-            ]} data={[
-              {
-                title:"test",
-                author:"Ditlev",
-                faust:"12912929",
-                materialType:"BOG",
-                status:"Mangler"
-              }
-            ]}></DBCTable>
+            ]} data={results}></DBCTable>
 
             <p>Vælg de poster, som skal indgå i sagen</p>
             
@@ -550,10 +574,4 @@ export default function StartCreateCase(props) {
       </Row>
     </Container>
   )
-
-  return (
-  <DBCModal title="Opret ny sag" onClose={() => setShow(false)}>
-    <DBCForm onSubmit={(e) => setShow("pickMaterialSource") || setMaterialeSource(e)} />
-  </DBCModal>
-  );
 }
