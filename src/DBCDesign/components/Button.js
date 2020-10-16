@@ -28,6 +28,9 @@ DBCButton.defaultProps = {
 }
 DBCButton.propTypes = {
     children: PropTypes.string.isRequired, // button label
-    variant: PropTypes.string, // button variant (color) [default: primary]
+    variant: PropTypes.oneOf(
+        ["primary","secondary","success","warning","danger","light","link",
+         "outline-primary","outline-secondary","outline-success","outline-warning","outline-danger","outline-light","outline-link",]
+    ), // button variant (color) [default: primary]
     onClick: PropTypes.func, // button onClick handler
 };

@@ -25,6 +25,7 @@ export default function DBCForm(props) {
                     as={child.type}
                     className="mr-sm-2"
                     id="inlineFormCustomSelect"
+                    onChange={props.onChange}
                     custom>
                     {
                         child.options
@@ -34,7 +35,7 @@ export default function DBCForm(props) {
                 </Form.Control>
             )
             case "checkbox": return (
-                <Form.Check type={child.type} onChange={() => props.onSelect(child.label)} label={child.label} />
+                <Form.Check type={child.type} onChange={() => props.onSelect(child)} label={child.label} />
             )
             case "textarea": return wrapChild(
                 <Form.Control as="textarea" placeholder={child.placeholder} onChange={(e) => setState({
@@ -49,14 +50,14 @@ export default function DBCForm(props) {
         }
     }
     return (
-        <Form className={props.className}>
+        <Form className={props.className} onSubmit={(e) => e.preventDefault() || props.onSubmit(state)}>
             <Form.Group controlId="x">
             {
                 props.elements.map(mapFormContent)
             }
             {
-                props.onSubmit && (
-                <DBCButton variant="primary" type="submit" onClick={() => props.onSubmit(state)}>
+                Object.keys(state).length > 0 && props.onSubmit && (
+                <DBCButton variant="primary" type="submit" onClick={(e) => e.preventDefault() || props.onSubmit(state)}>
                     {props.submitLabel}
                 </DBCButton>
                 )
