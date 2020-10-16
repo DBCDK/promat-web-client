@@ -1,0 +1,3 @@
+[submodule "promat-web-shared"]
+	path = promat-web-shared
+	url = git+ssh://git@github.com/DBCDK/promat-web-shared.git
