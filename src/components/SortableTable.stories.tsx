@@ -5,7 +5,15 @@ import SortableTable, {
   SortableTableColumn,
 } from "./SortableTable";
 
-const data: SortableTableData = [
+interface TableDataObject {
+  a: string
+  b: string
+  c: string
+  d: string
+  aRaw: number
+}
+
+const data: SortableTableData<TableDataObject> = [
   {
     a: "1",
     aRaw: 1,
@@ -28,7 +36,7 @@ const data: SortableTableData = [
     d: "4234",
   },
 ];
-const columns: SortableTableColumn[] = [
+const columns: SortableTableColumn<TableDataObject>[] = [
   { key: "a", comparatorField: "aRaw", header: "Col A" },
   { key: "c", comparatorField: "c" },
   { key: "d", header: "Col D" },
