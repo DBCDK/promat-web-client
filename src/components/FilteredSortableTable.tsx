@@ -10,6 +10,7 @@ interface Props<T> {
   columns: SortableTableColumn<T>[];
   tableProps?: TableProps;
   filterCallback: (value: T, index: number, array: T[]) => boolean;
+  emptyDataView?: React.ReactNode;
 }
 
 interface State<T> {
@@ -40,13 +41,14 @@ export default class FilteredSortableTable<T> extends React.Component<
   };
 
   render = () => {
-    const { tableProps, columns } = this.props;
+    const { tableProps, columns, emptyDataView } = this.props;
     const { filteredData } = this.state;
     return (
       <SortableTable
         tableProps={tableProps}
         columns={columns}
         data={filteredData}
+        emptyDataView={emptyDataView}
       />
     );
   };

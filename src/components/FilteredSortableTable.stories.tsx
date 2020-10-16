@@ -151,6 +151,7 @@ class FilteredSortableExampleComponent extends React.Component<Props, State> {
           data={data}
           filterCallback={this.filterCallback}
           ref={this.ref}
+          emptyDataView={<h3>no results</h3>}
         />
       </div>
     );

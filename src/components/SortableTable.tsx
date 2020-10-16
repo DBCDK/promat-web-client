@@ -51,6 +51,7 @@ interface Props<T> {
   data: SortableTableData<T>;
   columns: SortableTableColumn<T>[];
   tableProps?: TableProps;
+  emptyDataView?: React.ReactNode;
 }
 
 interface State<T> {
@@ -87,6 +88,7 @@ export default class SortableTable<T> extends React.Component<
           isSortingReversed
         );
       if (!comparator) {
+        // This case is unlikely but needed to make sure that comparator has a value before using it.
         return;
       }
       const sortedData = data.sort(comparator);
@@ -97,7 +99,6 @@ export default class SortableTable<T> extends React.Component<
   };
 
   handleSortByColumn = (column: SortableTableColumn<T>) =>
-    // @ts-ignore
     this.setState((prevState) => {
       const { isSortingReversed, currentSortedColumn } = prevState;
 
@@ -123,8 +124,12 @@ export default class SortableTable<T> extends React.Component<
     });
 
   render = () => {
-    const { tableProps, columns } = this.props;
+    const { tableProps, columns, emptyDataView } = this.props;
     const { sortedData, currentSortedColumn, isSortingReversed } = this.state;
+
+    if (emptyDataView && sortedData.length === 0) {
+      return emptyDataView
+    }
 
     return (
       <Table {...(tableProps || {})}>
