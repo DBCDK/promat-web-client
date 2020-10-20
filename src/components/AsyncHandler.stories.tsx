@@ -1,8 +1,9 @@
 import { storiesOf } from "@storybook/react";
 import React, { useContext } from "react";
 import AsyncHandler, { AsyncHandlerContext } from "./AsyncHandler";
+import { AsyncRequest } from "../utils/AsyncRequest";
 
-function OperationComponent() {
+function TextOperations() {
   const context = useContext(AsyncHandlerContext);
   if (context === null) {
     return null;
@@ -55,10 +56,62 @@ function ErrorDialog() {
   );
 }
 
-storiesOf("AsyncHandler", module).add("default", () => (
-  <AsyncHandler>
-    <OperationComponent />
-    <LoadingSpinner />
-    <ErrorDialog />
-  </AsyncHandler>
-));
+const sleep = (period: number) =>
+  new Promise((resolve) => setTimeout(resolve, period));
+
+const sleepWithError = (period: number) =>
+  new Promise((resolve, reject) =>
+    setTimeout(() => reject(new Error("sleepWithError")), period)
+  );
+
+class SucceedingOperation extends React.Component<{}, { hasLoaded: boolean }> {
+  state = { hasLoaded: false };
+  static contextType = AsyncHandlerContext;
+  componentDidMount = async () => {
+    const promise = sleep(1500);
+    await AsyncRequest(promise, this.context);
+    this.setState({ hasLoaded: true });
+  };
+
+  render = () => {
+    const { hasLoaded } = this.state;
+    return hasLoaded ? <p>SucceedingOperation has loaded!</p> : null;
+  };
+}
+
+class FailingOperation extends React.Component<{}, { hasLoaded: boolean }> {
+  state = { hasLoaded: false };
+  static contextType = AsyncHandlerContext;
+  componentDidMount = async () => {
+    const promise = sleepWithError(1500);
+    await AsyncRequest(promise, this.context);
+    this.setState({ hasLoaded: true });
+  };
+  render = () => {
+    const { hasLoaded } = this.state;
+    return hasLoaded ? <p>FailingOperation has loaded!</p> : null;
+  };
+}
+
+storiesOf("AsyncHandler", module)
+  .add("test operations", () => (
+    <AsyncHandler>
+      <TextOperations />
+      <LoadingSpinner />
+      <ErrorDialog />
+    </AsyncHandler>
+  ))
+  .add("succeeding operation", () => (
+    <AsyncHandler>
+      <SucceedingOperation />
+      <LoadingSpinner />
+      <ErrorDialog />
+    </AsyncHandler>
+  ))
+  .add("failing operation", () => (
+    <AsyncHandler>
+      <FailingOperation />
+      <LoadingSpinner />
+      <ErrorDialog />
+    </AsyncHandler>
+  ));

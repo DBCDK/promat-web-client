@@ -9,7 +9,7 @@ interface State {
   errors: Error[];
 }
 
-interface AsyncHandlerContext {
+export interface AsyncHandlerContext {
   addError(error: Error): void;
   dismissError(): void;
   beginOperation(): void;
