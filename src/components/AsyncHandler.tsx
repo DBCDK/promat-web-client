@@ -62,3 +62,52 @@ export default class AsyncHandler extends React.Component<Props, State> {
     );
   };
 }
+
+export async function asyncRequest<T>(
+  promise: Promise<T>,
+  context: AsyncHandlerContext
+): Promise<T | null> {
+  const { beginOperation, endOperation, addError } = context;
+  try {
+    beginOperation();
+    const result = await promise;
+    endOperation();
+    return result;
+  } catch (error) {
+    addError(error);
+    endOperation();
+    return null;
+  }
+}
+
+export interface AsyncHandlerProps {
+  asyncHandler: <T>(promise: Promise<T>) => Promise<T | null>;
+}
+
+type PropsWithoutInjectedHandler<P> = Omit<P, keyof AsyncHandlerProps>;
+
+export function withAsyncHandler<P>(Component: React.ComponentType<P>) {
+  return class ComponentWithAsyncHandler extends React.Component<
+    PropsWithoutInjectedHandler<P>
+  > {
+    static contextType = AsyncHandlerContext;
+    context!: AsyncHandlerContext | null;
+    render = () => {
+      const asyncHandler: <T>(promise: Promise<T>) => Promise<T | null> = (
+        promise
+      ) => {
+        if (this.context === null) {
+          throw new Error(
+            "withAsyncHandler should only wrap components that are mounted inside <AsyncHandler />."
+          );
+        }
+        return asyncRequest(promise, this.context);
+      };
+      const { ...props } = this.props;
+      return (
+        // @ts-ignore https://stackoverflow.com/questions/53867243/react-hoc-inject-props-with-typescript
+        <Component {...props} asyncHandler={asyncHandler}></Component>
+      );
+    };
+  };
+}
