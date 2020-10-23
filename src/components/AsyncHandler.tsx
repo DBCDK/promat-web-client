@@ -105,8 +105,7 @@ export function withAsyncHandler<P>(Component: React.ComponentType<P>) {
       };
       const { ...props } = this.props;
       return (
-        // @ts-ignore https://stackoverflow.com/questions/53867243/react-hoc-inject-props-with-typescript
-        <Component {...props} asyncHandler={asyncHandler}></Component>
+        <Component {...props as P} asyncHandler={asyncHandler}></Component>
       );
     };
   };
