@@ -25,6 +25,12 @@ function App() {
               </a>
             </header>
           </Route>
+          <Route
+            path="/find-records"
+            children={(routerProps) => {
+              return <FindRecordsContainer {...routerProps} />;
+            }}
+          ></Route>
           <Route path="*">Not found</Route>
         </Switch>
       </div>
