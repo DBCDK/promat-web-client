@@ -1,8 +1,9 @@
 import { ID } from "../../promat-web-shared/types/general";
-import { Case } from "../../promat-web-shared/types/case";
-import { ReviewerListItem } from "../../promat-web-shared/types/user";
+import { CaseCreateRequest, CaseResponse, CaseUpdateRequest } from "../../promat-web-shared/types/case";
+import { UserListItem } from "../../promat-web-shared/types/user";
+import { RecordListItem } from "../../promat-web-shared/types/record";
 
-const BASE_URL = "http://localhost:3000/"; // Get from env
+const BASE_URL = "http://localhost:3000"; // Get from env
 
 enum HTTPMethod {
   GET = "GET",
@@ -44,36 +45,36 @@ async function executeRequest<T>(request: Request): Promise<T> {
 }
 
 export default {
-  async getCase(id: ID): Promise<Case> {
+  async getCase(id: ID): Promise<CaseResponse> {
     const path = `/cases/${id}`;
     const request = createRequest(path);
-    const result = await executeRequest<Case>(request);
+    const result = await executeRequest<CaseResponse>(request);
     return result;
   },
-  async updateCase(id: ID, body: Case): Promise<Case> {
+  async updateCase(id: ID, body: CaseUpdateRequest): Promise<CaseResponse> {
     const path = `/cases/${id}`;
     const request = createRequest(path, HTTPMethod.PUT, { body });
-    const result = await executeRequest<Case>(request);
+    const result = await executeRequest<CaseResponse>(request);
     return result;
   },
 
-  async createCase(body: Case): Promise<Case> {
+  async createCase(body: CaseCreateRequest): Promise<CaseResponse> {
     const path = `/cases`;
     const request = createRequest(path, HTTPMethod.POST, { body });
-    const result = await executeRequest<Case>(request);
+    const result = await executeRequest<CaseResponse>(request);
     return result;
   },
-  async getReviwers(): Promise<ReviewerListItem[]> {
+  async getReviwers(): Promise<UserListItem[]> {
     const path = `/reviewers`;
     const request = createRequest(path);
-    const result = await executeRequest<ReviewerListItem[]>(request);
+    const result = await executeRequest<UserListItem[]>(request);
     return result;
   },
-  async searchRecords(query: string): Promise<ReviewerListItem[]> {
-    const path = `/records/search`;
+  async searchRecords(query: string): Promise<RecordListItem[]> {
+    const path = `/records`;
     const queryParams = { id: query };
     const request = createRequest(path, HTTPMethod.GET, { queryParams });
-    const result = await executeRequest<ReviewerListItem[]>(request);
+    const result = await executeRequest<RecordListItem[]>(request);
     return result;
   },
 };
